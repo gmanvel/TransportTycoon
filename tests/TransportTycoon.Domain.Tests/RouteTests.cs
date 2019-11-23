@@ -7,16 +7,24 @@ namespace TransportTycoon.Domain.Tests
 {
     public class RouteTests
     {
-        [Fact]
+        private readonly IRouteFactory _routeFactory;
+
+        public RouteTests()
+        {
+            _routeFactory = Route.Factory(new RouteValidator());
+        }
+
+        [Theory]
+        [MemberData(nameof(RouteStartEndDestinations))]
         public void Route_Start_End_Destinations_Should_Differ(IDestination start, IDestination end, bool throws)
         {
             if (throws)
             {
-                Assert.Throws<ArgumentException>(() => new Route(start, end, TransportKind.Truck, 1));
+                Assert.Throws<ArgumentException>(() => _routeFactory.Create(start, end, TransportKind.Truck, 1));
             }
             else
             {
-                new Route(start, end, TransportKind.Truck, 1);
+                var route = _routeFactory.Create(start, end, TransportKind.Truck, 1);
             }
         }
 
@@ -25,7 +33,97 @@ namespace TransportTycoon.Domain.Tests
             yield return new object[]
             {
                 Destination.Factory,
+                Destination.Factory,
                 true
+            };
+
+            yield return new object[]
+            {
+                Destination.Factory,
+                Destination.Port,
+                false
+            };
+        }
+
+        [Theory]
+        [MemberData(nameof(InvalidRoutes))]
+        public void Route_Should_Be_Valid(IDestination start, IDestination end) =>
+            Assert.Throws<ArgumentException>(() => _routeFactory.Create(start, end, TransportKind.Truck, 1));
+
+        public static IEnumerable<object[]> InvalidRoutes()
+        {
+            yield return new object[]
+            {
+                Destination.Factory,
+                Destination.A
+            };
+
+            yield return new object[]
+            {
+                Destination.A,
+                Destination.Factory
+            };
+
+            yield return new object[]
+            {
+                Destination.Port,
+                Destination.B
+            };
+
+            yield return new object[]
+            {
+                Destination.Port,
+                Destination.B
+            };
+        }
+
+        [Theory]
+        [MemberData(nameof(InvalidTransportKindsForRoutes))]
+        public void TransportKind_Should_Be_Valid_For_Given_Route(IDestination start, IDestination end, TransportKind transportKind) =>
+            Assert.Throws<ArgumentException>(() => _routeFactory.Create(start, end, transportKind, 1));
+
+        public static IEnumerable<object[]> InvalidTransportKindsForRoutes()
+        {
+            yield return new object[]
+            {
+                Destination.Factory,
+                Destination.Port,
+                TransportKind.Ship
+            };
+
+            yield return new object[]
+            {
+                Destination.Port,
+                Destination.Factory,
+                TransportKind.Ship
+            };
+
+            yield return new object[]
+            {
+                Destination.Factory,
+                Destination.B,
+                TransportKind.Ship
+            };
+
+            yield return new object[]
+            {
+                Destination.B,
+                Destination.Factory,
+                TransportKind.Ship
+            };
+
+            yield return new object[]
+            {
+                Destination.Port,
+                Destination.A,
+                TransportKind.Truck
+            };
+
+            yield return new object[]
+            {
+                Destination.A,
+                Destination.Port,
+                TransportKind.Truck
             };
         }
     }
