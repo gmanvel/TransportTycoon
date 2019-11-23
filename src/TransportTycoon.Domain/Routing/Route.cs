@@ -20,7 +20,7 @@ namespace TransportTycoon.Domain.Routing
             TimeEstimate = timeEstimate;
         }
 
-        public Route ReturnRoute() => new Route(End, Start, TransportKind, TimeEstimate);
+        public Route GetReturnRoute() => new Route(End, Start, TransportKind, TimeEstimate);
 
         public static IRouteFactory Factory(IValidateRoute routeValidator) => new RouteFactory(routeValidator);
 

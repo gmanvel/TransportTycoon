@@ -132,7 +132,7 @@ namespace TransportTycoon.Domain.Tests
         {
             var route = _routeFactory.Create(Destination.Factory, Destination.B, TransportKind.Truck, 5);
 
-            var returnRoute = route.ReturnRoute();
+            var returnRoute = route.GetReturnRoute();
 
             Assert.Equal(route.Start, returnRoute.End);
             Assert.Equal(route.End, returnRoute.Start);
