@@ -15,18 +15,6 @@ namespace TransportTycoon.Domain
             throw new ArgumentException($"Can't map <{destination}> string to destination.");
         }
 
-        public static bool IsTruckDestination(IDestination destination) =>
-            destination is FactoryDestination
-            ||
-            destination is PortDestination
-            ||
-            destination is BDestination;
-
-        public static bool IsPortDestination(IDestination destination) =>
-            destination is PortDestination
-            ||
-            destination is ADestination;
-
         public static bool IsA(IDestination destination) => destination is ADestination;
 
         public static IDestination A => ADestination.Instance;

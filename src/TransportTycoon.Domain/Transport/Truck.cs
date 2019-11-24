@@ -1,14 +1,18 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using TransportTycoon.Domain.Events;
+using TransportTycoon.Domain.Infrastructure;
 using TransportTycoon.Domain.Routing;
 
 namespace TransportTycoon.Domain.Transport
 {
-    public class Truck : ITransport
+    public class Truck: ITransport
     {
-        private int _currentRouteEstimate = 0;
+        private readonly Queue<Action<int>> _deliverySteps;
 
-        private Cargo _carryingCargo = null;
+        private readonly List<Cargo> _carryingCargoes;
 
         private Route _currentRoute = null;
 
@@ -20,57 +24,54 @@ namespace TransportTycoon.Domain.Transport
 
         public TransportKind Kind => TransportKind.Truck;
 
+        public Truck(int id) : this(id, Destination.Factory)
+        { }
+
+        public Truck(int id, IDestination origin)
+        {
+            Id = id;
+            _origin = origin;
+            _currentDestination = origin;
+            _deliverySteps = new Queue<Action<int>>();
+            _carryingCargoes = new List<Cargo>();
+        }
+
         public bool IsAvailableAt(IDestination destination)
         {
-            if (IsOnRoute)
+            if (IsOnRoute())
                 return false;
 
             return _currentDestination == destination;
         }
 
-        public Truck(int id) : this(id, Destination.Factory)
-        { }
-
-        public Truck(int id, IDestination originDestination)
+        public void Deliver(IEnumerable<Cargo> cargoes, Route route)
         {
-            Id = id;
-            _currentDestination = originDestination;
-            _origin = originDestination;
-        }
-
-        public void Load(Cargo cargo, Route route)
-        {
-            _currentRouteEstimate = route.TimeEstimate;
-
-            _carryingCargo = cargo;
+            _carryingCargoes.AddRange(cargoes);
 
             _currentRoute = route;
+
+            var deliveryEstimate = route.TimeEstimate;
+
+            // depart
+            _deliverySteps.Enqueue(Depart);
+
+            for (int i = 1; i < deliveryEstimate - 1; i++)
+            {
+                _deliverySteps.Enqueue(Move);
+            }
+
+            // arrive
+            _deliverySteps.Enqueue(Arrive);
         }
 
-        public Cargo Unload()
+        public void Tick(int time)
         {
-            _carryingCargo.DropAt(_currentRoute.End);
-
-            var cargo = _carryingCargo;
-
-            _carryingCargo = null;
-
-            return cargo;
-        }
-
-        public void Move(int time)
-        {
-            if (_currentRouteEstimate == 0)
+            if (!_deliverySteps.TryDequeue(out var deliveryStep))
                 return;
 
-            if (_currentRoute.TimeEstimate == _currentRouteEstimate && HasCargo)
-                Depart(time);
-
-            _currentRouteEstimate--;
-
-            if (_currentRouteEstimate == 0)
-                Arrive(time);
+            deliveryStep.Invoke(time);
         }
+
 
         private void Depart(int time)
         {
@@ -81,18 +82,21 @@ namespace TransportTycoon.Domain.Transport
                 Kind = Kind.ToString().ToUpperInvariant(),
                 Location = _currentDestination.Name.ToUpperInvariant(),
                 Destination = _currentRoute.End.Name.ToUpperInvariant(),
-                Cargo = new[]
-                {
+                Cargo = _carryingCargoes.Select(carryingCargo =>
                     new CargoDetails
                     {
-                        CargoId = _carryingCargo.Id,
-                        Destination = _carryingCargo.TargetDestination.Name.ToUpperInvariant(),
-                        Origin = _carryingCargo.Origin.Name.ToUpperInvariant()
-                    }
-                }
+                        CargoId = carryingCargo.Id,
+                        Destination = carryingCargo.TargetDestination.Name.ToUpperInvariant(),
+                        Origin = carryingCargo.Origin.Name.ToUpperInvariant()
+                    })
             };
 
             Debug.WriteLine(transportDepartedEvent.ToString());
+        }
+
+        private void Move(int time)
+        {
+            Debug.WriteLine($"{Kind}-{Id} moves at {time} on the route {_currentRoute.Start.Name} -> {_currentRoute.End.Name}");
         }
 
         private void Arrive(int time)
@@ -103,38 +107,40 @@ namespace TransportTycoon.Domain.Transport
                 TransportId = Id,
                 Kind = Kind.ToString().ToUpperInvariant(),
                 Location = _currentRoute.End.Name.ToUpperInvariant(),
-                Cargo = new[]
-                {
+                Cargo = _carryingCargoes.Select(carryingCargo =>
                     new CargoDetails
                     {
-                        CargoId = _carryingCargo.Id,
-                        Destination = _carryingCargo.TargetDestination.Name.ToUpperInvariant(),
-                        Origin = _carryingCargo.Origin.Name.ToUpperInvariant()
-                    }
-                }
+                        CargoId = carryingCargo.Id,
+                        Destination = carryingCargo.TargetDestination.Name.ToUpperInvariant(),
+                        Origin = carryingCargo.Origin.Name.ToUpperInvariant()
+                    })
             };
 
             Debug.WriteLine(transportArrivedEvent.ToString());
 
             _currentDestination = _currentRoute.End;
 
-            Unload();
+            _carryingCargoes.ForEach(cargo => cargo.DropAt(_currentRoute.End));
+
+            _carryingCargoes.Clear();
 
             if (_origin != _currentDestination)
+            {
                 Return();
+            }
+            else
+            {
+                _currentRoute = null;
+            }
         }
 
         private void Return()
         {
             var returnRoute = _currentRoute.GetReturnRoute();
 
-            _currentRoute = returnRoute;
-
-            _currentRouteEstimate = returnRoute.TimeEstimate;
+            Deliver(Enumerable.Empty<Cargo>(), returnRoute);
         }
 
-        private bool HasCargo => _carryingCargo is null;
-
-        private bool IsOnRoute => _currentRoute is null;
+        private bool IsOnRoute() => !(_currentRoute is null);
     }
 }

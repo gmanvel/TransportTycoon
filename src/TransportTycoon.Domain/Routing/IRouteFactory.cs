@@ -1,4 +1,6 @@
-﻿namespace TransportTycoon.Domain.Routing
+﻿using TransportTycoon.Domain.Transport;
+
+namespace TransportTycoon.Domain.Routing
 {
     public interface IRouteFactory
     {

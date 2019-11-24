@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace TransportTycoon.Domain
 {
@@ -31,6 +32,9 @@ namespace TransportTycoon.Domain
         {
             CurrentDestination = destination;
             IsDelivered = CurrentDestination == TargetDestination;
+
+            if(IsDelivered)
+                Debug.WriteLine($"*** Cargo-{TargetDestination.Name}-{Id} is delivered at {CurrentDestination.Name} ***");
         }
     }
 }

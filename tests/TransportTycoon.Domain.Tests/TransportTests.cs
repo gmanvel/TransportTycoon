@@ -7,9 +7,9 @@ namespace TransportTycoon.Domain.Tests
     public class TransportTests
     {
         [Fact]
-        public void Transport()
+        public void Truck_Goes_To_B()
         {
-            var truck = new Truck2(1);
+            var truck = new Truck(1);
 
             var cargo = new Cargo(1, Destination.B);
 
@@ -31,9 +31,9 @@ namespace TransportTycoon.Domain.Tests
         }
 
         [Fact]
-        public void Transport2()
+        public void Transport_Goes_To_Port()
         {
-            var truck = new Truck2(1);
+            var truck = new Truck(1);
 
             var cargo = new Cargo(1, Destination.A);
 
@@ -44,14 +44,41 @@ namespace TransportTycoon.Domain.Tests
             truck.Deliver(new[] { cargo }, route);
 
             int time = 0;
-            while (!cargo.IsDelivered)
+            while (true)
             {
                 truck.Tick(time);
+
+                if (cargo.CurrentDestination == Destination.Port)
+                    break;
+
+                time++;
+            }
+            
+            Assert.Equal(1, time);
+        }
+
+        [Fact]
+        public void Ship_Goes_To_A()
+        {
+            var ship = new Ship(1);
+
+            var cargo = new Cargo(1, Destination.A);
+
+            var routeFactory = Route.Factory(new RouteValidator());
+
+            var route = routeFactory.Create(Destination.Port, Destination.A, TransportKind.Ship, 4);
+
+            ship.Deliver(new[] { cargo }, route);
+
+            int time = 0;
+            while (!cargo.IsDelivered)
+            {
+                ship.Tick(time);
 
                 time++;
             }
 
-            Assert.Equal(1, time);
+            Assert.Equal(4, time);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using TransportTycoon.Domain.Routing;
+﻿using System.Collections.Generic;
+using TransportTycoon.Domain.Routing;
 
 namespace TransportTycoon.Domain.Transport
 {
@@ -10,10 +11,8 @@ namespace TransportTycoon.Domain.Transport
 
         bool IsAvailableAt(IDestination destination);
 
-        void Move(int time);
+        void Deliver(IEnumerable<Cargo> cargoes, Route route);
 
-        void Load(Cargo cargo, Route route);
-
-        Cargo Unload();
+        void Tick(int time);
     }
 }

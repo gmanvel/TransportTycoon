@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TransportTycoon.Domain.Routing;
+using TransportTycoon.Domain.Transport;
 using Xunit;
 
 namespace TransportTycoon.Domain.Tests
