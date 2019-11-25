@@ -20,7 +20,7 @@ namespace TransportTycoon.Domain.Events
         [JsonProperty("location")]
         public string Location { get; set; }
 
-        [JsonProperty("cargo")]
+        [JsonProperty("cargo", NullValueHandling = NullValueHandling.Ignore)]
         public IEnumerable<CargoDetails> Cargo { get; set; }
 
         public override string ToString() => JsonConvert.SerializeObject(this);

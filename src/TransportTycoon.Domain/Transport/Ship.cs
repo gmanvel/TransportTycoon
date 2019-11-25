@@ -43,7 +43,7 @@ namespace TransportTycoon.Domain.Transport
             return _currentDestination == destination;
         }
 
-        public void Deliver(IEnumerable<Cargo> cargoes, Route route)
+        public void PlanDelivery(IEnumerable<Cargo> cargoes, Route route)
         {
             _carryingCargoes.AddRange(cargoes);
 
@@ -51,16 +51,16 @@ namespace TransportTycoon.Domain.Transport
 
             var deliveryEstimate = route.TimeEstimate;
 
-            // 1 depart
+            // depart
             _deliverySteps.Enqueue(Depart);
 
-            // 2 move
-            for (int i = 1; i < deliveryEstimate - 1; i++)
+            // move
+            for (int i = 1; i <= deliveryEstimate - 2; i++)
             {
                 _deliverySteps.Enqueue(Move);
             }
 
-            // 3 arrive
+            // arrive
             _deliverySteps.Enqueue(Arrive);
         }
 
@@ -95,7 +95,7 @@ namespace TransportTycoon.Domain.Transport
 
         private void Move(int time)
         {
-            Debug.WriteLine($"{Kind}-{Id} moves at {time} on the route {_currentRoute.Start.Name} -> {_currentRoute.End.Name}");
+            //Debug.WriteLine($"{Kind}-{Id} moves at {time} on the route {_currentRoute.Start.Name} -> {_currentRoute.End.Name}");
         }
 
         private void Arrive(int time)
@@ -126,6 +126,7 @@ namespace TransportTycoon.Domain.Transport
             if (_origin != _currentDestination)
             {
                 Return();
+                Depart(time);
             }
             else
             {
@@ -137,7 +138,18 @@ namespace TransportTycoon.Domain.Transport
         {
             var returnRoute = _currentRoute.GetReturnRoute();
 
-            Deliver(Enumerable.Empty<Cargo>(), returnRoute);
+            _currentRoute = returnRoute;
+
+            var deliveryEstimate = returnRoute.TimeEstimate;
+
+            // move
+            for (int i = 1; i < deliveryEstimate - 1; i++)
+            {
+                _deliverySteps.Enqueue(Move);
+            }
+
+            // arrive
+            _deliverySteps.Enqueue(Arrive);
         }
 
         private bool IsOnRoute() => !(_currentRoute is null);

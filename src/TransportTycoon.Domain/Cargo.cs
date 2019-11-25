@@ -33,8 +33,8 @@ namespace TransportTycoon.Domain
             CurrentDestination = destination;
             IsDelivered = CurrentDestination == TargetDestination;
 
-            if(IsDelivered)
-                Debug.WriteLine($"*** Cargo-{TargetDestination.Name}-{Id} is delivered at {CurrentDestination.Name} ***");
+            //if(IsDelivered)
+            //    Debug.WriteLine($"*** Cargo-{TargetDestination.Name}-{Id} is delivered at {CurrentDestination.Name} ***");
         }
     }
 }

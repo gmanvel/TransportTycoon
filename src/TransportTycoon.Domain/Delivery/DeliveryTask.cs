@@ -14,9 +14,9 @@ namespace TransportTycoon.Domain.Delivery
 
         private ITransport _transport;
 
-        private ReturnTask _returnTask;
+        //private ReturnTask _returnTask;
 
-        private Action<int> _currentStep;
+        //private Action<int> _currentStep;
 
         public bool IsCompleted { get; private set; }
 
@@ -26,70 +26,84 @@ namespace TransportTycoon.Domain.Delivery
             _route = route;
             _transportManager = transportManager;
 
-            _returnTask = null;
+            //_returnTask = null;
             IsCompleted = false;
-            _currentStep = FindAvailableTransport;
+            //_currentStep = FindAvailableTransport;
         }
 
-        public void Execute(int time)
+        public void Setup()
         {
-            _currentStep.Invoke(time);
-        }
+            if (IsCompleted)
+                return;
 
-        private void FindAvailableTransport(int time)
-        {
-            _transport = _transportManager.GetTransportAt(_cargo.CurrentDestination, _route.TransportKind);
-
-            if (_transport != null)
-            {
-                _returnTask = new ReturnTask(_transport, _route.GetReturnRoute().End);
-                _transport.Deliver(new[] { _cargo }, _route);
-                _transport.Tick(time);
-                _currentStep = Deliver;
-            }
-        }
-
-        private void Deliver(int time)
-        {
             if (_cargo.CurrentDestination == _route.End)
             {
-                _currentStep = Return;
+                IsCompleted = true;
+                return;
             }
 
-            _transport.Tick(time);
+            if (_transport == null)
+            {
+                _transport = _transportManager.GetTransportAt(_cargo.CurrentDestination, _route.TransportKind);
+                _transport?.PlanDelivery(new[] { _cargo }, _route);
+            }
         }
 
-        private void Return(int time)
-        {
-            _returnTask.Execute(time);
+        //private void FindAvailableTransport(int time)
+        //{
+        //    _transport = _transportManager.GetTransportAt(_cargo.CurrentDestination, _route.TransportKind);
 
-            if (_returnTask.Done())
-                _currentStep = MarkDeliveryTaskComplete;
-        }
+        //    if (_transport != null)
+        //    {
+        //        _returnTask = new ReturnTask(_transport, _route.GetReturnRoute().End);
+        //        _transport.PlanDelivery(new[] { _cargo }, _route);
+        //        _transport.Tick(time);
+        //        _currentStep = Deliver;
+        //    }
+        //}
 
-        private void MarkDeliveryTaskComplete(int time) => IsCompleted = true;
+        //private void Deliver(int time)
+        //{
+        //    if (_cargo.CurrentDestination == _route.End)
+        //    {
+        //        _currentStep = MarkDeliveryTaskComplete;
+        //        //Return;
+        //    }
+
+        //    //_transport.Tick(time);
+        //}
+
+        //private void Return(int time)
+        //{
+        //    _returnTask.Execute(time);
+
+        //    if (_returnTask.Done())
+        //        _currentStep = MarkDeliveryTaskComplete;
+        //}
+
+        //private void MarkDeliveryTaskComplete(int time) => IsCompleted = true;
         
 
-        private class ReturnTask
-        {
-            private readonly ITransport _transport;
-            private readonly IDestination _end;
+        //private class ReturnTask
+        //{
+        //    private readonly ITransport _transport;
+        //    private readonly IDestination _end;
 
-            public ReturnTask(ITransport transport, IDestination end)
-            {
-                _transport = transport;
-                _end = end;
-            }
+        //    public ReturnTask(ITransport transport, IDestination end)
+        //    {
+        //        _transport = transport;
+        //        _end = end;
+        //    }
 
-            public void Execute(int time)
-            {
-                if (Done())
-                    return;
+        //    public void Execute(int time)
+        //    {
+        //        if (Done())
+        //            return;
 
-                _transport.Tick(time);
-            }
+        //        _transport.Tick(time);
+        //    }
 
-            public bool Done() => _transport.IsAvailableAt(_end);
-        }
+        //    public bool Done() => _transport.IsAvailableAt(_end);
+        //}
     }
 }

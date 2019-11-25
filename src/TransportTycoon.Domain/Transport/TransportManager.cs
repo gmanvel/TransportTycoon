@@ -6,7 +6,7 @@ namespace TransportTycoon.Domain.Transport
 {
     public class TransportManager : ITransportManager
     {
-        private static IEnumerable<ITransport> _availableTransport;
+        private static List<ITransport> _availableTransport;
 
         public TransportManager()
         {
@@ -21,6 +21,8 @@ namespace TransportTycoon.Domain.Transport
 
             _availableTransport = new List<ITransport> {truck1, truck2, ship1};
         }
+
+        public void OnTick(int time) => _availableTransport.ForEach(transport => transport.Tick(time));
 
         public ITransport GetTransportAt(IDestination destination, TransportKind transportKind) =>
             _availableTransport.FirstOrDefault(transport =>

@@ -17,7 +17,7 @@ namespace TransportTycoon.Domain.Tests
 
             var route = routeFactory.Create(Destination.Factory, Destination.B, TransportKind.Truck, 5);
 
-            truck.Deliver(new [] {cargo}, route);
+            truck.PlanDelivery(new [] {cargo}, route);
 
             int time = 0;
             while (!cargo.IsDelivered)
@@ -41,7 +41,7 @@ namespace TransportTycoon.Domain.Tests
 
             var route = routeFactory.Create(Destination.Factory, Destination.Port, TransportKind.Truck, 1);
 
-            truck.Deliver(new[] { cargo }, route);
+            truck.PlanDelivery(new[] { cargo }, route);
 
             int time = 0;
             while (true)
@@ -68,7 +68,7 @@ namespace TransportTycoon.Domain.Tests
 
             var route = routeFactory.Create(Destination.Port, Destination.A, TransportKind.Ship, 4);
 
-            ship.Deliver(new[] { cargo }, route);
+            ship.PlanDelivery(new[] { cargo }, route);
 
             int time = 0;
             while (!cargo.IsDelivered)
