@@ -48,6 +48,8 @@ namespace TransportTycoon.Domain.Tests
 
                 var cargo = new Cargo(cargoId, destination);
 
+                destination.StoreCargo(cargo);
+
                 cargoes.Add(cargo);
 
                 _deliveryManager.PlanDelivery(cargo);

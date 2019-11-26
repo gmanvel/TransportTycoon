@@ -30,8 +30,12 @@ namespace TransportTycoon.Domain
 
         public void DropAt(IDestination destination)
         {
+            destination.StoreCargo(this);
+
             CurrentDestination = destination;
+
             IsDelivered = CurrentDestination == TargetDestination;
+
 
             //if(IsDelivered)
             //    Debug.WriteLine($"*** Cargo-{TargetDestination.Name}-{Id} is delivered at {CurrentDestination.Name} ***");
