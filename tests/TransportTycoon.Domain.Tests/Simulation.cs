@@ -32,8 +32,8 @@ namespace TransportTycoon.Domain.Tests
         [InlineData("A,B", 5)]
         [InlineData("B,B", 5)]
         [InlineData("A,B,B", 7)]
-        [InlineData("A,A,B,A,B,B,A,B", 29)] // aababbab.log
-        //[InlineData("A,B,B,B,A,B,A,A,A,B,B,B", 29)] // abbbabaaabbb.log
+        [InlineData("A,A,B,A,B,B,A,B", 29)]
+        [InlineData("A,B,B,B,A,B,A,A,A,B,B,B", 41)]
         public void Run(string destinationString, int expectedTime)
         {
             var cargoes = new List<Cargo>();
