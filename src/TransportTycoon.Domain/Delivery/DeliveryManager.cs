@@ -41,7 +41,7 @@ namespace TransportTycoon.Domain.Delivery
 
             OnTick?.Invoke(time);
 
-            _deliveryTasks.ForEach(deliveryTask => deliveryTask.Setup());
+            _deliveryTasks.ForEach(deliveryTask => deliveryTask.Setup(time));
             _deliveryTasks.RemoveAll(deliveryTask => deliveryTask.IsCompleted);
         }
     }

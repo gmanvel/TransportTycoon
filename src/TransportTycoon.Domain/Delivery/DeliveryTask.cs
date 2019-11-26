@@ -49,6 +49,24 @@ namespace TransportTycoon.Domain.Delivery
             }
         }
 
+        public void Setup(int time)
+        {
+            if (IsCompleted)
+                return;
+
+            if (_cargo.CurrentDestination == _route.End)
+            {
+                IsCompleted = true;
+                return;
+            }
+
+            if (_transport == null)
+            {
+                _transport = _transportManager.GetTransportAt(_cargo.CurrentDestination, _route.TransportKind);
+                _transport?.PlanDelivery(new[] { _cargo }, _route, time);
+            }
+        }
+
         //private void FindAvailableTransport(int time)
         //{
         //    _transport = _transportManager.GetTransportAt(_cargo.CurrentDestination, _route.TransportKind);
@@ -82,7 +100,7 @@ namespace TransportTycoon.Domain.Delivery
         //}
 
         //private void MarkDeliveryTaskComplete(int time) => IsCompleted = true;
-        
+
 
         //private class ReturnTask
         //{

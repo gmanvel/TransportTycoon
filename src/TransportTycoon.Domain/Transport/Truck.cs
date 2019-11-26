@@ -56,13 +56,20 @@ namespace TransportTycoon.Domain.Transport
             _deliverySteps.Enqueue(Depart);
 
             // move
-            for (int i = 1; i <= deliveryEstimate - 2; i++)
+            for (int i = 1; i <= deliveryEstimate - 1; i++)
             {
                 _deliverySteps.Enqueue(Move);
             }
 
             // arrive
             _deliverySteps.Enqueue(Arrive);
+        }
+
+        public void PlanDelivery(IEnumerable<Cargo> cargoes, Route route, int time)
+        {
+            PlanDelivery(cargoes, route);
+
+            Tick(time);
         }
 
         public void Tick(int time)
@@ -145,7 +152,7 @@ namespace TransportTycoon.Domain.Transport
             var deliveryEstimate = returnRoute.TimeEstimate;
 
             // move
-            for (int i = 1; i < deliveryEstimate - 1; i++)
+            for (int i = 1; i < deliveryEstimate; i++)
             {
                 _deliverySteps.Enqueue(Move);
             }

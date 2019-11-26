@@ -13,6 +13,8 @@ namespace TransportTycoon.Domain.Transport
 
         void PlanDelivery(IEnumerable<Cargo> cargoes, Route route);
 
+        void PlanDelivery(IEnumerable<Cargo> cargoes, Route route, int time);
+
         void Tick(int time);
     }
 }
