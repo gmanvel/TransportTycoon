@@ -298,6 +298,11 @@ namespace TransportTycoon.Domain.Transport
             Debug.WriteLine(transportArrivedEvent.ToString());
 
             _currentDestination = _currentRoute.End;
+
+            if (_currentDestination != _origin)
+                Return(_currentRoute, time);
+            else
+                _currentRoute = null;
         }
 
         private void Unload(int time)
@@ -319,14 +324,9 @@ namespace TransportTycoon.Domain.Transport
 
             Debug.WriteLine(cargoUnloadedEvent.ToString());
 
-            _cargoes.ForEach(cargo => cargo.DropAt(_currentRoute.End));
+            _cargoes.ForEach(cargo => cargo.DropAt(_currentDestination));
 
             _cargoes.Clear();
-
-            if (_currentDestination != _origin)
-                Return(_currentRoute, time);
-            else
-                _currentRoute = null;
         }
 
         private void Return(Route route, int time)

@@ -11,6 +11,8 @@ namespace TransportTycoon.Domain
 
         IEnumerable<Cargo> PeekCargoes();
 
-        Cargo TakeCargo(Cargo cargo);
+        Cargo TakeCargo(int cargoId);
+
+        IEnumerable<Cargo> TakeCargoes(IEnumerable<int> cargoIds);
     }
 }

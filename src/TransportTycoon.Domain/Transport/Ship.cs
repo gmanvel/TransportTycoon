@@ -224,14 +224,12 @@ namespace TransportTycoon.Domain.Transport
 
             _deliverySteps.Enqueue(Depart);
 
-            for (int i = 1; i <= routeEstimate - 2; i++)
+            for (int i = 1; i <= routeEstimate - 1; i++)
             {
                 _deliverySteps.Enqueue(Move);
             }
 
             _deliverySteps.Enqueue(Arrive);
-
-            _deliverySteps.Enqueue(Unload);
         }
 
         private void Load(IEnumerable<Cargo> cargoes, int time)
@@ -302,6 +300,11 @@ namespace TransportTycoon.Domain.Transport
             Debug.WriteLine(transportArrivedEvent.ToString());
 
             _currentDestination = _currentRoute.End;
+
+            if (_currentDestination == _origin)
+                _currentRoute = null;
+            else
+                Unload(time);
         }
 
         private void Unload(int time)
@@ -323,14 +326,12 @@ namespace TransportTycoon.Domain.Transport
 
             Debug.WriteLine(cargoUnloadedEvent.ToString());
 
-            _cargoes.ForEach(cargo => cargo.DropAt(_currentRoute.End));
+            _cargoes.ForEach(cargo => cargo.DropAt(_currentDestination));
 
             _cargoes.Clear();
 
             if (_currentDestination != _origin)
                 Return(_currentRoute, time);
-            else
-                _currentRoute = null;
         }
 
         private void Return(Route route, int time)
@@ -339,12 +340,12 @@ namespace TransportTycoon.Domain.Transport
 
             _currentRoute = returnRoute;
 
-            Depart(time);
+            _deliverySteps.Enqueue(Depart);
 
             var deliveryEstimate = returnRoute.TimeEstimate;
 
             // move
-            for (int i = 1; i < deliveryEstimate; i++)
+            for (int i = 1; i < deliveryEstimate - 1; i++)
             {
                 _deliverySteps.Enqueue(Move);
             }

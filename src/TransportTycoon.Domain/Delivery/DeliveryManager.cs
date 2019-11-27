@@ -66,7 +66,7 @@ namespace TransportTycoon.Domain.Delivery
         {
             var factory = Destination.Factory;
 
-            var cargoes = factory.PeekCargoes();
+            var cargoes = factory.PeekCargoes().ToList();
 
             foreach (var cargo in cargoes)
             {
@@ -78,7 +78,7 @@ namespace TransportTycoon.Domain.Delivery
 
                 if (truck != null)
                 {
-                    var __cargo = factory.TakeCargo(cargo);
+                    var __cargo = factory.TakeCargo(cargo.Id);
                     truck.Deliver(new[] {__cargo}, firstRoute, time);
                 }
             }
@@ -98,9 +98,11 @@ namespace TransportTycoon.Domain.Delivery
             if (ship == null)
                 return;
 
+            var cargoes = Destination.Port.TakeCargoes(portCargoes.Select(cargo => cargo.Id));
+
             var route = Route.Factory(new RouteValidator()).Create(Destination.Port, Destination.A);
 
-            ship.Deliver(portCargoes, route, time);
+            ship.Deliver(cargoes, route, time);
         }
     }
 }

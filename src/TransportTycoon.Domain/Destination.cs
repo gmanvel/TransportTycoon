@@ -32,7 +32,26 @@ namespace TransportTycoon.Domain
             _cargoStore.Add(cargo);
         }
 
-        public virtual Cargo TakeCargo(Cargo cargo) => _cargoStore.Find(c => c.Id == cargo.Id);
+        public virtual Cargo TakeCargo(int cargoId)
+        {
+            var cargo = _cargoStore.Find(c => c.Id == cargoId);
+
+            if (cargo != null)
+                _cargoStore.Remove(cargo);
+
+            return cargo;
+        }
+
+        public IEnumerable<Cargo> TakeCargoes(IEnumerable<int> cargoIds)
+        {
+            var cargoIdList = cargoIds.ToList();
+
+            var cargoes = _cargoStore.Where(cargo => cargoIdList.Contains(cargo.Id)).ToList();
+
+            _cargoStore.RemoveAll(cargo => cargoIdList.Contains(cargo.Id));
+
+            return cargoes;
+        }
 
         public virtual IEnumerable<Cargo> PeekCargoes() => _cargoStore;
 
