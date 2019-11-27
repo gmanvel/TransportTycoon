@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using TransportTycoon.Domain.Routing;
 using TransportTycoon.Domain.Transport;
 
@@ -43,6 +44,63 @@ namespace TransportTycoon.Domain.Delivery
 
             _deliveryTasks.ForEach(deliveryTask => deliveryTask.Setup(time));
             _deliveryTasks.RemoveAll(deliveryTask => deliveryTask.IsCompleted);
+        }
+
+        public void InitialSetup()
+        {
+            DeliverCargoesFromFactory(0);
+
+            DeliverCargoesFromPort(0);
+        }
+
+        public void Tick2(int time)
+        {
+            OnTick?.Invoke(time);
+
+            DeliverCargoesFromFactory(time);
+
+            DeliverCargoesFromPort(time);
+        }
+
+        private void DeliverCargoesFromFactory(int time)
+        {
+            var factory = Destination.Factory;
+
+            var cargoes = factory.PeekCargoes();
+
+            foreach (var cargo in cargoes)
+            {
+                var routes = _routePlanner.GetDeliveryRoutes(cargo.TargetDestination).Where(route => route.Start == Destination.Factory);
+
+                var firstRoute = routes.FirstOrDefault();
+
+                var truck = _transportManager.GetTransportAt2(factory, TransportKind.Truck);
+
+                if (truck != null)
+                {
+                    var __cargo = factory.TakeCargo(cargo);
+                    truck.Deliver(new[] {__cargo}, firstRoute, time);
+                }
+            }
+        }
+
+        private void DeliverCargoesFromPort(int time)
+        {
+            var port = Destination.Port;
+
+            var portCargoes = port.PeekCargoes().Take(4).ToList();
+
+            if (portCargoes.Count == 0)
+                return;
+
+            var ship = _transportManager.GetTransportAt2(port, TransportKind.Ship);
+
+            if (ship == null)
+                return;
+
+            var route = Route.Factory(new RouteValidator()).Create(Destination.Port, Destination.A);
+
+            ship.Deliver(portCargoes, route, time);
         }
     }
 }

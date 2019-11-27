@@ -22,7 +22,7 @@ namespace TransportTycoon.Domain.Routing
             else if (end == Destination.A)
             {
                 yield return _routeFactory.Create(Destination.Factory, Destination.Port, TransportKind.Truck, 1);
-                yield return _routeFactory.Create(Destination.Port, Destination.A, TransportKind.Ship, 4);
+                yield return _routeFactory.Create(Destination.Port, Destination.A, TransportKind.Ship, 6);
             }
             else
                 throw new ArgumentException($"Doesn't have routes to deliver to {end.Name}");

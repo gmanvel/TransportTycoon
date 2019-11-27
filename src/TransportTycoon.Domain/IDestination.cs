@@ -9,6 +9,8 @@ namespace TransportTycoon.Domain
 
         void StoreCargo(Cargo cargo);
 
-        IEnumerable<Cargo> GetCargoes();
+        IEnumerable<Cargo> PeekCargoes();
+
+        Cargo TakeCargo(Cargo cargo);
     }
 }

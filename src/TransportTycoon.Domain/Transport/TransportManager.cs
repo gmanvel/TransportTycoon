@@ -8,7 +8,15 @@ namespace TransportTycoon.Domain.Transport
     {
         private static List<ITransport> _availableTransport;
 
+        private static List<ITransport2> _availableTransport2;
+
         public TransportManager()
+        {
+            //SetupTransport();
+            SetupTransport2();
+        }
+
+        private void SetupTransport()
         {
             var truck1Id = SequentialIdGenerator.GenerateIdFor(SequentialIdGenerator.Entity.Truck);
             var truck1 = new Truck(truck1Id);
@@ -19,13 +27,35 @@ namespace TransportTycoon.Domain.Transport
             var ship1Id = SequentialIdGenerator.GenerateIdFor(SequentialIdGenerator.Entity.Ship);
             var ship1 = new Ship(ship1Id);
 
-            _availableTransport = new List<ITransport> {truck1, truck2, ship1};
+            _availableTransport = new List<ITransport> { truck1, truck2, ship1 };
         }
 
-        public void OnTick(int time) => _availableTransport.ForEach(transport => transport.Tick(time));
+        private void SetupTransport2()
+        {
+            var truck1Id = SequentialIdGenerator.GenerateIdFor(SequentialIdGenerator.Entity.Truck);
+            var truck1 = new Truck2(truck1Id);
+
+            var truck2Id = SequentialIdGenerator.GenerateIdFor(SequentialIdGenerator.Entity.Truck);
+            var truck2 = new Truck2(truck2Id);
+
+            var ship1Id = SequentialIdGenerator.GenerateIdFor(SequentialIdGenerator.Entity.Ship);
+            var ship1 = new Ship2(ship1Id);
+
+            _availableTransport2 = new List<ITransport2> { truck1, truck2, ship1 };
+        }
+
+        public void OnTick(int time) => _availableTransport2.ForEach(transport => transport.OnTick(time));
 
         public ITransport GetTransportAt(IDestination destination, TransportKind transportKind) =>
             _availableTransport.FirstOrDefault(transport =>
+            {
+                var transportKindMatch = transport.Kind == transportKind;
+                var transportAvailableAtMatch = transport.IsAvailableAt(destination);
+                return transportKindMatch && transportAvailableAtMatch;
+            });
+
+        public ITransport2 GetTransportAt2(IDestination destination, TransportKind transportKind) =>
+            _availableTransport2.FirstOrDefault(transport =>
             {
                 var transportKindMatch = transport.Kind == transportKind;
                 var transportAvailableAtMatch = transport.IsAvailableAt(destination);

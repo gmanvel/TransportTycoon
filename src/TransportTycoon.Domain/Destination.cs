@@ -32,7 +32,9 @@ namespace TransportTycoon.Domain
             _cargoStore.Add(cargo);
         }
 
-        public virtual IEnumerable<Cargo> GetCargoes() => _cargoStore;
+        public virtual Cargo TakeCargo(Cargo cargo) => _cargoStore.Find(c => c.Id == cargo.Id);
+
+        public virtual IEnumerable<Cargo> PeekCargoes() => _cargoStore;
 
         public static bool IsA(IDestination destination) => destination is ADestination;
 

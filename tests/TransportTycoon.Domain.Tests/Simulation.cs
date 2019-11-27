@@ -11,7 +11,7 @@ namespace TransportTycoon.Domain.Tests
 {
     public class Simulation
     {
-        private readonly IDeliveryManager _deliveryManager;
+        private readonly DeliveryManager _deliveryManager;
 
         public Simulation()
         {
@@ -27,18 +27,20 @@ namespace TransportTycoon.Domain.Tests
         }
 
         [Theory]
-        [InlineData("A", 5)]
-        [InlineData("B", 5)]
-        [InlineData("A,B", 5)]
-        [InlineData("B,B", 5)]
-        [InlineData("A,B,B", 7)]
+        //[InlineData("A", 5)]
+        //[InlineData("B", 5)]
+        //[InlineData("A,B", 5)]
+        //[InlineData("B,B", 5)]
+        //[InlineData("A,B,B", 7)]
         [InlineData("A,A,B,A,B,B,A,B", 29)]
-        [InlineData("A,B,B,B,A,B,A,A,A,B,B,B", 41)]
+        //[InlineData("A,B,B,B,A,B,A,A,A,B,B,B", 41)]
         public void Run(string destinationString, int expectedTime)
         {
             var cargoes = new List<Cargo>();
 
             var destinations = destinationString.Split(",", StringSplitOptions.RemoveEmptyEntries);
+
+            var factory = Destination.Factory;
 
             foreach (var destinationName in destinations)
             {
@@ -48,18 +50,33 @@ namespace TransportTycoon.Domain.Tests
 
                 var cargo = new Cargo(cargoId, destination);
 
-                destination.StoreCargo(cargo);
+                factory.StoreCargo(cargo);
 
                 cargoes.Add(cargo);
-
-                _deliveryManager.PlanDelivery(cargo);
             }
 
-            int time = 0;
+            //foreach (var destinationName in destinations)
+            //{
+            //    var destination = Destination.FromString(destinationName);
+
+            //    var cargoId = SequentialIdGenerator.GenerateIdFor(SequentialIdGenerator.Entity.Cargo);
+
+            //    var cargo = new Cargo(cargoId, destination);
+
+            //    destination.StoreCargo(cargo);
+
+            //    cargoes.Add(cargo);
+
+            //    _deliveryManager.PlanDelivery(cargo);
+            //}
+
+            _deliveryManager.InitialSetup();
+
+            int time = 1;
 
             while (!cargoes.All(cargo => cargo.IsDelivered))
             {
-                _deliveryManager.Tick(time);
+                _deliveryManager.Tick2(time);
 
                 time++;
             }

@@ -47,6 +47,34 @@ namespace TransportTycoon.Domain.Routing
 
                 return new Route(start, end, transportKind, routeEstimate);
             }
+
+            public Route Create(IDestination start, IDestination end)
+            {
+                if (!_routeValidator.IsValidRoute(start, end))
+                    throw new ArgumentException($"{start.Name} -> {end.Name} is an invalid route.");
+
+                if (start == Destination.Factory)
+                {
+                    if (end == Destination.B)
+                    {
+                        return new Route(start, end, TransportKind.Truck, 5);
+                    }
+
+                    if (end == Destination.Port)
+                    {
+                        return new Route(start, end, TransportKind.Truck, 1);
+                    }
+                }
+                else if (start == Destination.Port)
+                {
+                    if (end == Destination.A)
+                    {
+                        return new Route(start, end, TransportKind.Ship, 6);
+                    }
+                }
+
+                throw new InvalidOperationException($"Couldn't create a valid route {start.Name} -> {end.Name}");
+            }
         }
     }
 }
