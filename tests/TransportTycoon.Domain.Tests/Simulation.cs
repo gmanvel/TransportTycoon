@@ -15,9 +15,7 @@ namespace TransportTycoon.Domain.Tests
 
         public Simulation()
         {
-            var routeValidator = new RouteValidator();
-
-            var routeFactory = Route.Factory(routeValidator);
+            var routeFactory = Route.Factory;
 
             var routePlanner = new RoutePlanner(routeFactory);
 
@@ -27,12 +25,12 @@ namespace TransportTycoon.Domain.Tests
         }
 
         [Theory]
-        //[InlineData("A", 5)]
+        //[InlineData("A", 8)]
         //[InlineData("B", 5)]
-        //[InlineData("A,B", 5)]
+        //[InlineData("A,B", 8)]
         //[InlineData("B,B", 5)]
-        //[InlineData("A,B,B", 7)]
-        //[InlineData("A,A,B,A,B,B,A,B", 29)]
+        //[InlineData("A,B,B", 8)]
+        //[InlineData("A,A,B,A,B,B,A,B", 34)]
         [InlineData("A,B,B,B,A,B,A,A,A,B,B,B", 41)]
         public void Run(string destinationString, int expectedTime)
         {
@@ -55,28 +53,13 @@ namespace TransportTycoon.Domain.Tests
                 cargoes.Add(cargo);
             }
 
-            //foreach (var destinationName in destinations)
-            //{
-            //    var destination = Destination.FromString(destinationName);
-
-            //    var cargoId = SequentialIdGenerator.GenerateIdFor(SequentialIdGenerator.Entity.Cargo);
-
-            //    var cargo = new Cargo(cargoId, destination);
-
-            //    destination.StoreCargo(cargo);
-
-            //    cargoes.Add(cargo);
-
-            //    _deliveryManager.PlanDelivery(cargo);
-            //}
-
             _deliveryManager.InitialSetup();
 
             int time = 1;
 
             while (!cargoes.All(cargo => cargo.IsDelivered))
             {
-                _deliveryManager.Tick2(time);
+                _deliveryManager.Tick(time);
 
                 time++;
             }

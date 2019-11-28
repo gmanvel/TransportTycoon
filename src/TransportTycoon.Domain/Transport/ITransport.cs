@@ -11,10 +11,8 @@ namespace TransportTycoon.Domain.Transport
 
         bool IsAvailableAt(IDestination destination);
 
-        void PlanDelivery(IEnumerable<Cargo> cargoes, Route route);
+        void Deliver(IEnumerable<Cargo> cargoes, Route route, int time);
 
-        void PlanDelivery(IEnumerable<Cargo> cargoes, Route route, int time);
-
-        void Tick(int time);
+        void OnTick(int time);
     }
 }

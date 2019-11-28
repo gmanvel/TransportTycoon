@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using TransportTycoon.Domain.Routing;
 using TransportTycoon.Domain.Transport;
 
@@ -9,7 +8,6 @@ namespace TransportTycoon.Domain.Delivery
     {
         private readonly IPlanRoute _routePlanner;
         private readonly ITransportManager _transportManager;
-        private readonly List<DeliveryTask> _deliveryTasks;
 
         public delegate void TickHandler(int time);
         public event TickHandler OnTick;
@@ -18,32 +16,8 @@ namespace TransportTycoon.Domain.Delivery
         {
             _routePlanner = routePlanner;
             _transportManager = transportManager;
-            _deliveryTasks = new List<DeliveryTask>();
 
             OnTick += _transportManager.OnTick;
-        }
-
-        public void PlanDelivery(Cargo cargo)
-        {
-            var routes = _routePlanner.GetDeliveryRoutes(cargo.TargetDestination);
-
-            foreach (var route in routes)
-            {
-                var deliveryTask = new DeliveryTask(cargo, route, _transportManager);
-                
-                _deliveryTasks.Add(deliveryTask);
-            }
-        }
-
-        public void Tick(int time)
-        {
-            _deliveryTasks.ForEach(deliveryTask => deliveryTask.Setup());
-            _deliveryTasks.RemoveAll(deliveryTask => deliveryTask.IsCompleted);
-
-            OnTick?.Invoke(time);
-
-            _deliveryTasks.ForEach(deliveryTask => deliveryTask.Setup(time));
-            _deliveryTasks.RemoveAll(deliveryTask => deliveryTask.IsCompleted);
         }
 
         public void InitialSetup()
@@ -53,7 +27,7 @@ namespace TransportTycoon.Domain.Delivery
             DeliverCargoesFromPort(0);
         }
 
-        public void Tick2(int time)
+        public void Tick(int time)
         {
             OnTick?.Invoke(time);
 
@@ -74,7 +48,7 @@ namespace TransportTycoon.Domain.Delivery
 
                 var firstRoute = routes.FirstOrDefault();
 
-                var truck = _transportManager.GetTransportAt2(factory, TransportKind.Truck);
+                var truck = _transportManager.GetTransportAt(factory, TransportKind.Truck);
 
                 if (truck != null)
                 {
@@ -93,14 +67,14 @@ namespace TransportTycoon.Domain.Delivery
             if (portCargoes.Count == 0)
                 return;
 
-            var ship = _transportManager.GetTransportAt2(port, TransportKind.Ship);
+            var ship = _transportManager.GetTransportAt(port, TransportKind.Ship);
 
             if (ship == null)
                 return;
 
             var cargoes = Destination.Port.TakeCargoes(portCargoes.Select(cargo => cargo.Id));
 
-            var route = Route.Factory(new RouteValidator()).Create(Destination.Port, Destination.A);
+            var route = Route.Factory.Create(Destination.Port, Destination.A);
 
             ship.Deliver(cargoes, route, time);
         }

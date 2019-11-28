@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TransportTycoon.Domain.Transport;
 
 namespace TransportTycoon.Domain.Routing
@@ -23,57 +24,34 @@ namespace TransportTycoon.Domain.Routing
 
         public Route GetReturnRoute() => new Route(End, Start, TransportKind, TimeEstimate);
 
-        public static IRouteFactory Factory(IValidateRoute routeValidator) => new RouteFactory(routeValidator);
+        public static IRouteFactory Factory { get; } = new RouteFactory();
 
         public class RouteFactory : IRouteFactory
         {
-            private readonly IValidateRoute _routeValidator;
+            private static Dictionary<(IDestination start, IDestination end), Route> DestinationToRouteMap { get; } =
+                new Dictionary<(IDestination start, IDestination end), Route>
+                {
+                    [(Destination.Factory, Destination.B)] = new Route(Destination.Factory, Destination.B, TransportKind.Truck, 5),
+                    [(Destination.B, Destination.Factory)] = new Route(Destination.B, Destination.Factory, TransportKind.Truck, 5),
 
-            public RouteFactory(IValidateRoute routeValidator)
-            {
-                _routeValidator = routeValidator;
-            }
+                    [(Destination.Factory, Destination.Port)] = new Route(Destination.Factory, Destination.Port, TransportKind.Truck, 1),
+                    [(Destination.Port, Destination.Factory)] = new Route(Destination.Port, Destination.Factory, TransportKind.Truck, 1),
 
-            public Route Create(IDestination start, IDestination end, TransportKind transportKind, int routeEstimate)
+                    [(Destination.Port, Destination.A)] = new Route(Destination.Port, Destination.A, TransportKind.Ship, 6),
+                    [(Destination.A, Destination.Port)] = new Route(Destination.A, Destination.Port, TransportKind.Ship, 6)
+                };
+
+            public Route Create(IDestination start, IDestination end)
             {
                 if (start == end)
                     throw new ArgumentException("Route start and end destinations should be different.");
 
-                if (!_routeValidator.IsValidRoute(start, end))
+                var destinationKey = (start, end);
+
+                if (!DestinationToRouteMap.ContainsKey(destinationKey))
                     throw new ArgumentException($"{start.Name} -> {end.Name} is an invalid route.");
 
-                if (!_routeValidator.IsValidTransportTypeForRoute(start, end, transportKind))
-                    throw new ArgumentException("Invalid transport kind for the route.");
-
-                return new Route(start, end, transportKind, routeEstimate);
-            }
-
-            public Route Create(IDestination start, IDestination end)
-            {
-                if (!_routeValidator.IsValidRoute(start, end))
-                    throw new ArgumentException($"{start.Name} -> {end.Name} is an invalid route.");
-
-                if (start == Destination.Factory)
-                {
-                    if (end == Destination.B)
-                    {
-                        return new Route(start, end, TransportKind.Truck, 5);
-                    }
-
-                    if (end == Destination.Port)
-                    {
-                        return new Route(start, end, TransportKind.Truck, 1);
-                    }
-                }
-                else if (start == Destination.Port)
-                {
-                    if (end == Destination.A)
-                    {
-                        return new Route(start, end, TransportKind.Ship, 6);
-                    }
-                }
-
-                throw new InvalidOperationException($"Couldn't create a valid route {start.Name} -> {end.Name}");
+                return DestinationToRouteMap[destinationKey];
             }
         }
     }

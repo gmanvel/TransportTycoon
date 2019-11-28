@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using TransportTycoon.Domain.Transport;
 
 namespace TransportTycoon.Domain.Routing
 {
@@ -17,12 +16,12 @@ namespace TransportTycoon.Domain.Routing
         {
             if (end == Destination.B)
             {
-                yield return _routeFactory.Create(Destination.Factory, Destination.B, TransportKind.Truck, 5);
+                yield return _routeFactory.Create(Destination.Factory, Destination.B);
             }
             else if (end == Destination.A)
             {
-                yield return _routeFactory.Create(Destination.Factory, Destination.Port, TransportKind.Truck, 1);
-                yield return _routeFactory.Create(Destination.Port, Destination.A, TransportKind.Ship, 6);
+                yield return _routeFactory.Create(Destination.Factory, Destination.Port);
+                yield return _routeFactory.Create(Destination.Port, Destination.A);
             }
             else
                 throw new ArgumentException($"Doesn't have routes to deliver to {end.Name}");

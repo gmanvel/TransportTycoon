@@ -13,21 +13,21 @@ namespace TransportTycoon.Domain.Tests
 
             var cargo = new Cargo(1, Destination.B);
 
-            var routeFactory = Route.Factory(new RouteValidator());
+            var routeFactory = Route.Factory;
 
-            var route = routeFactory.Create(Destination.Factory, Destination.B, TransportKind.Truck, 5);
+            var route = routeFactory.Create(Destination.Factory, Destination.B);
 
-            truck.PlanDelivery(new [] {cargo}, route);
+            truck.Deliver(new [] {cargo}, route, 0);
 
             int time = 0;
             while (!cargo.IsDelivered)
             {
-                truck.Tick(time);
+                truck.OnTick(time);
 
                 time++;
             }
 
-            Assert.Equal(5, time);
+            Assert.Equal(route.TimeEstimate, time);
         }
 
         [Fact]
@@ -37,16 +37,16 @@ namespace TransportTycoon.Domain.Tests
 
             var cargo = new Cargo(1, Destination.A);
 
-            var routeFactory = Route.Factory(new RouteValidator());
+            var routeFactory = Route.Factory;
 
-            var route = routeFactory.Create(Destination.Factory, Destination.Port, TransportKind.Truck, 1);
+            var route = routeFactory.Create(Destination.Factory, Destination.Port);
 
-            truck.PlanDelivery(new[] { cargo }, route);
+            truck.Deliver(new[] { cargo }, route, 0);
 
             int time = 0;
             while (true)
             {
-                truck.Tick(time);
+                truck.OnTick(time);
 
                 if (cargo.CurrentDestination == Destination.Port)
                     break;
@@ -54,7 +54,7 @@ namespace TransportTycoon.Domain.Tests
                 time++;
             }
             
-            Assert.Equal(1, time);
+            Assert.Equal(route.TimeEstimate, time);
         }
 
         [Fact]
@@ -64,21 +64,21 @@ namespace TransportTycoon.Domain.Tests
 
             var cargo = new Cargo(1, Destination.A);
 
-            var routeFactory = Route.Factory(new RouteValidator());
+            var routeFactory = Route.Factory;
 
-            var route = routeFactory.Create(Destination.Port, Destination.A, TransportKind.Ship, 4);
+            var route = routeFactory.Create(Destination.Port, Destination.A);
 
-            ship.PlanDelivery(new[] { cargo }, route);
+            ship.Deliver(new[] { cargo }, route, 0);
 
             int time = 0;
             while (!cargo.IsDelivered)
             {
-                ship.Tick(time);
+                ship.OnTick(time);
 
                 time++;
             }
 
-            Assert.Equal(4, time);
+            Assert.Equal(route.TimeEstimate, time);
         }
     }
 }

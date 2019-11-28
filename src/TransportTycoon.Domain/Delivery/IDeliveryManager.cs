@@ -1,8 +1,8 @@
-﻿namespace TransportTycoon.Domain
+﻿namespace TransportTycoon.Domain.Delivery
 {
     public interface IDeliveryManager
     {
-        void PlanDelivery(Cargo cargo);
+        void InitialSetup();
 
         void Tick(int time);
     }

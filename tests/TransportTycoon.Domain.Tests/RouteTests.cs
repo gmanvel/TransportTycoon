@@ -12,7 +12,7 @@ namespace TransportTycoon.Domain.Tests
 
         public RouteTests()
         {
-            _routeFactory = Route.Factory(new RouteValidator());
+            _routeFactory = Route.Factory;
         }
 
         [Theory]
@@ -21,11 +21,11 @@ namespace TransportTycoon.Domain.Tests
         {
             if (throws)
             {
-                Assert.Throws<ArgumentException>(() => _routeFactory.Create(start, end, TransportKind.Truck, 1));
+                Assert.Throws<ArgumentException>(() => _routeFactory.Create(start, end));
             }
             else
             {
-                var route = _routeFactory.Create(start, end, TransportKind.Truck, 1);
+                var route = _routeFactory.Create(start, end);
             }
         }
 
@@ -49,7 +49,7 @@ namespace TransportTycoon.Domain.Tests
         [Theory]
         [MemberData(nameof(InvalidRoutes))]
         public void Route_Should_Be_Valid(IDestination start, IDestination end) =>
-            Assert.Throws<ArgumentException>(() => _routeFactory.Create(start, end, TransportKind.Truck, 1));
+            Assert.Throws<ArgumentException>(() => _routeFactory.Create(start, end));
 
         public static IEnumerable<object[]> InvalidRoutes()
         {
@@ -81,7 +81,7 @@ namespace TransportTycoon.Domain.Tests
         [Theory]
         [MemberData(nameof(InvalidTransportKindsForRoutes))]
         public void TransportKind_Should_Be_Valid_For_Given_Route(IDestination start, IDestination end, TransportKind transportKind) =>
-            Assert.Throws<ArgumentException>(() => _routeFactory.Create(start, end, transportKind, 1));
+            Assert.Throws<ArgumentException>(() => _routeFactory.Create(start, end));
 
         public static IEnumerable<object[]> InvalidTransportKindsForRoutes()
         {
@@ -131,7 +131,7 @@ namespace TransportTycoon.Domain.Tests
         [Fact]
         public void Routes_Return_Route_Swaps_Start_End_Destinations()
         {
-            var route = _routeFactory.Create(Destination.Factory, Destination.B, TransportKind.Truck, 5);
+            var route = _routeFactory.Create(Destination.Factory, Destination.B);
 
             var returnRoute = route.GetReturnRoute();
 
